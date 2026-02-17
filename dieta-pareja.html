@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Plan Nutricional</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --white:#ffffff; --gray-50:#f9f9f8; --gray-100:#f1f1ef; --gray-200:#e9e9e7;
+  --gray-300:#d9d9d6; --gray-400:#b7b7b0; --gray-500:#9b9b93; --gray-600:#6f6f67;
+  --gray-700:#4a4a44; --gray-800:#2f2f2b; --gray-900:#191916;
+  --accent:#2d6a4f; --accent-pale:#f0faf4; --accent-mid:#c8e6d4;
+  --blue:#2563eb; --blue-pale:#eff6ff; --blue-mid:#bfdbfe;
+  --purple:#7c3aed; --purple-pale:#f5f3ff; --purple-mid:#ddd6fe;
+  --font:'Geist',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-serif:'Lora',Georgia,serif;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow:0 4px 12px rgba(0,0,0,0.06),0 2px 4px rgba(0,0,0,0.04);
+}
+html { scroll-behavior:smooth; }
+body { font-family:var(--font); background:var(--gray-50); color:var(--gray-900); min-height:100vh; font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+
+/* ── PAGES ── */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ── TOPBAR ── */
+.topbar { background:rgba(255,255,255,.94); backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%); border-bottom:1px solid var(--gray-200); position:sticky; top:0; z-index:200; padding:0 20px; }
+.topbar-inner { max-width:720px; margin:0 auto; height:56px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.topbar-brand { display:flex; align-items:center; gap:10px; }
+.topbar-icon { width:30px; height:30px; background:var(--accent); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.topbar-title { font-family:var(--font-serif); font-size:16px; font-weight:600; letter-spacing:-.2px; }
+.topbar-sub { font-size:11px; color:var(--gray-500); }
+.ptoggle { display:flex; background:var(--gray-100); border-radius:8px; padding:3px; gap:2px; border:1px solid var(--gray-200); flex-shrink:0; }
+.pbtn { padding:5px 13px; border-radius:6px; border:none; background:transparent; font-family:var(--font); font-size:12px; font-weight:500; color:var(--gray-500); cursor:pointer; transition:all .15s; white-space:nowrap; }
+.pbtn.active { background:var(--white); color:var(--gray-900); box-shadow:var(--shadow-sm); font-weight:600; }
+
+/* Top-level nav (Recetas / Semana) */
+.mainnav { background:rgba(255,255,255,.96); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid var(--gray-200); position:sticky; top:57px; z-index:195; }
+.mainnav-inner { max-width:720px; margin:0 auto; display:flex; padding:0 16px; }
+.mnbtn { flex-shrink:0; padding:11px 18px 9px; border:none; background:transparent; font-family:var(--font); font-size:13px; font-weight:500; color:var(--gray-500); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; display:flex; align-items:center; gap:6px; }
+.mnbtn.active { color:var(--gray-900); border-bottom-color:var(--gray-900); font-weight:600; }
+
+/* ── RECIPES PAGE ── */
+.tabnav { background:rgba(255,255,255,.96); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid var(--gray-200); position:sticky; top:105px; z-index:190; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.tabnav::-webkit-scrollbar { display:none; }
+.tabnav-inner { display:flex; max-width:720px; margin:0 auto; padding:0 16px; }
+.tbtn { flex-shrink:0; padding:11px 14px 9px; border:none; background:transparent; font-family:var(--font); font-size:13px; font-weight:500; color:var(--gray-500); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; display:flex; align-items:center; gap:5px; white-space:nowrap; }
+.tbtn .te { font-size:14px; }
+.tbtn.active { color:var(--gray-900); border-bottom-color:var(--gray-900); font-weight:600; }
+
+main { max-width:720px; margin:0 auto; padding:28px 20px 80px; }
+.rsection { display:none; }
+.rsection.active { display:block; }
+.sec-intro { margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid var(--gray-200); }
+.sec-heading { font-family:var(--font-serif); font-size:24px; font-weight:600; letter-spacing:-.4px; margin-bottom:5px; }
+.sec-desc { font-size:13px; color:var(--gray-500); line-height:1.6; }
+.kcal-chips { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+.kchip { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11.5px; font-weight:500; border:1px solid; }
+.kchip-l { background:var(--gray-100); color:var(--gray-600); border-color:var(--gray-200); }
+.kchip-y { background:var(--accent-pale); color:var(--accent); border-color:var(--accent-mid); }
+
+/* Recipe cards */
+.recipe-list { display:flex; flex-direction:column; }
+.rrow { background:var(--white); border:1px solid var(--gray-200); border-radius:12px; overflow:hidden; margin-bottom:7px; transition:box-shadow .15s,border-color .15s; animation:fadeUp .2s ease both; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+.rrow:hover { border-color:var(--gray-300); box-shadow:var(--shadow-sm); }
+.rrow.open { border-color:var(--gray-300); box-shadow:var(--shadow); }
+.rhead { display:flex; align-items:center; padding:13px 15px; cursor:pointer; gap:12px; user-select:none; }
+.remoji { font-size:20px; width:38px; height:38px; display:flex; align-items:center; justify-content:center; background:var(--gray-50); border-radius:8px; flex-shrink:0; border:1px solid var(--gray-100); }
+.rinfo { flex:1; min-width:0; }
+.rname { font-family:var(--font-serif); font-size:14.5px; font-weight:600; letter-spacing:-.1px; line-height:1.3; }
+.rmeta { display:flex; align-items:center; gap:7px; margin-top:3px; flex-wrap:wrap; }
+.rtime { font-size:11px; color:var(--gray-400); }
+.mtags { display:flex; gap:4px; flex-wrap:wrap; }
+.mtag { font-size:10.5px; font-weight:500; padding:2px 7px; border-radius:4px; white-space:nowrap; }
+.mtag-l { background:var(--gray-100); color:var(--gray-600); }
+.mtag-y { background:var(--accent-pale); color:var(--accent); font-weight:600; }
+.chev { color:var(--gray-400); transition:transform .2s,color .15s; flex-shrink:0; font-size:11px; }
+.rrow.open .chev { transform:rotate(180deg); color:var(--gray-700); }
+.rbody { display:none; border-top:1px solid var(--gray-100); }
+.rrow.open .rbody { display:block; }
+.rbody-inner { padding:18px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:520px){.rbody-inner{grid-template-columns:1fr;gap:16px;}}
+.bsec-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--gray-400); margin-bottom:9px; }
+.itbl { width:100%; border-collapse:collapse; }
+.itbl thead th { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--gray-400); padding:0 0 5px; text-align:right; }
+.itbl thead th:first-child { text-align:left; }
+.itbl tbody tr { border-bottom:1px solid var(--gray-100); }
+.itbl tbody tr:last-child { border-bottom:none; }
+.itbl td { padding:5px 0; font-size:12.5px; vertical-align:top; }
+.iname { color:var(--gray-800); }
+.iql { text-align:right; color:var(--gray-500); font-variant-numeric:tabular-nums; padding-left:8px; white-space:nowrap; }
+.iqy { text-align:right; color:var(--accent); font-weight:600; font-variant-numeric:tabular-nums; padding-left:8px; white-space:nowrap; }
+.col-l { color:var(--gray-400); }
+.col-y { color:var(--accent); }
+.steps { display:flex; flex-direction:column; gap:8px; }
+.step { display:flex; gap:9px; font-size:12.5px; color:var(--gray-700); line-height:1.55; }
+.stepn { width:19px; height:19px; border-radius:50%; background:var(--gray-100); color:var(--gray-500); font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+
+/* Mode visibility */
+.show-lucia .mtag-y,.show-lucia .col-y,.show-lucia .iqy,.show-lucia .kchip-y { display:none!important; }
+.show-you .mtag-l,.show-you .col-l,.show-you .iql,.show-you .kchip-l { display:none!important; }
+
+/* ── CALENDAR PAGE ── */
+.cal-page { max-width:900px; margin:0 auto; padding:28px 20px 80px; }
+.cal-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+.cal-nav { display:flex; align-items:center; gap:12px; }
+.cal-nav-btn { width:34px; height:34px; border-radius:8px; border:1px solid var(--gray-200); background:var(--white); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--gray-600); transition:all .15s; }
+.cal-nav-btn:hover { background:var(--gray-50); border-color:var(--gray-300); }
+.cal-week-label { font-family:var(--font-serif); font-size:19px; font-weight:600; letter-spacing:-.3px; }
+.cal-today-btn { padding:6px 14px; border-radius:7px; border:1px solid var(--gray-200); background:var(--white); font-family:var(--font); font-size:12px; font-weight:500; color:var(--gray-600); cursor:pointer; transition:all .15s; }
+.cal-today-btn:hover { background:var(--gray-50); }
+/* Grid: horizontal on desktop, vertical on mobile */
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:40px; }
+.cal-day { background:var(--white); border:1px solid var(--gray-200); border-radius:12px; overflow:hidden; min-height:160px; display:flex; flex-direction:column; transition:border-color .15s,box-shadow .15s; }
+.cal-day.today { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent-mid); }
+.cal-day-head { padding:10px 8px 8px; border-bottom:1px solid var(--gray-100); display:flex; flex-direction:column; align-items:center; gap:3px; }
+.cal-day-name { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--gray-400); }
+.cal-day-num { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; color:var(--gray-700); }
+.today .cal-day-num { background:var(--accent); color:white; }
+.cal-day-meals { padding:7px; flex:1; display:flex; flex-direction:column; gap:5px; }
+.cal-slot { border-radius:7px; padding:6px 7px; cursor:pointer; font-size:11px; line-height:1.3; transition:all .15s; min-height:38px; display:flex; flex-direction:column; justify-content:center; border:1px dashed var(--gray-200); color:var(--gray-400); text-align:center; }
+.cal-slot:hover { background:var(--gray-50); border-color:var(--gray-300); color:var(--gray-500); }
+.cal-slot.filled { border:1px solid transparent; text-align:left; color:var(--gray-700); }
+.cal-slot.filled.slot-comida { background:var(--blue-pale); border-color:var(--blue-mid); }
+.cal-slot.filled.slot-cena { background:var(--purple-pale); border-color:var(--purple-mid); }
+.slot-label { font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; opacity:.55; margin-bottom:2px; }
+.slot-name { font-size:11px; font-weight:500; line-height:1.25; }
+.slot-empty-icon { font-size:13px; margin-bottom:2px; }
+.slot-empty-txt { font-size:9.5px; }
+
+/* ── MOBILE: vertical layout ── */
+@media (max-width: 640px) {
+  .cal-grid { grid-template-columns: 1fr; gap: 10px; }
+  .cal-day { min-height: unset; flex-direction: row; align-items: stretch; border-radius: 14px; }
+  .cal-day-head {
+    padding: 14px 12px; border-bottom: none; border-right: 1px solid var(--gray-100);
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; min-width: 60px; flex-shrink: 0;
+  }
+  .cal-day-name { font-size: 10px; }
+  .cal-day-num { width: 30px; height: 30px; font-size: 15px; }
+  .cal-day-meals { padding: 10px 12px; flex-direction: row; gap: 10px; align-items: stretch; }
+  .cal-slot {
+    flex: 1; min-height: 60px; border-radius: 10px;
+    padding: 10px 12px; text-align: left; justify-content: flex-start;
+  }
+  .cal-slot.filled { justify-content: flex-start; }
+  .slot-label { font-size: 9px; margin-bottom: 4px; }
+  .slot-name { font-size: 12px; line-height: 1.35; }
+  .slot-empty-icon { font-size: 18px; margin-bottom: 3px; }
+  .slot-empty-txt { font-size: 11px; }
+}
+
+/* Modal */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.25); z-index:500; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .2s; }
+.modal-overlay.open { opacity:1; pointer-events:all; }
+.modal { background:var(--white); border-radius:20px 20px 0 0; width:100%; max-width:520px; padding:24px 24px 48px; transform:translateY(20px); transition:transform .25s ease; max-height:75vh; overflow-y:auto; }
+.modal-overlay.open .modal { transform:translateY(0); }
+.modal-title { font-family:var(--font-serif); font-size:18px; font-weight:600; margin-bottom:3px; }
+.modal-sub { font-size:12px; color:var(--gray-500); margin-bottom:20px; }
+.modal-select { width:100%; padding:11px 36px 11px 14px; border:1px solid var(--gray-200); border-radius:8px; font-family:var(--font); font-size:14px; color:var(--gray-800); background:var(--gray-50); outline:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239b9b93' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; margin-bottom:14px; }
+.modal-select:focus { border-color:var(--accent); }
+.modal-actions { display:flex; gap:8px; }
+.modal-btn { flex:1; padding:12px; border-radius:8px; border:none; font-family:var(--font); font-size:14px; font-weight:600; cursor:pointer; transition:all .15s; }
+.modal-btn-confirm { background:var(--accent); color:white; }
+.modal-btn-confirm:hover { background:#245a42; }
+.modal-btn-clear { background:#fff0f0; color:#c0392b; }
+.modal-btn-clear:hover { background:#ffe0e0; }
+.modal-btn-cancel { background:var(--gray-100); color:var(--gray-600); flex:0 0 auto; padding:12px 18px; }
+
+/* History */
+.history-title { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--gray-400); margin:0 0 12px; display:flex; align-items:center; gap:10px; }
+.history-title::after { content:''; flex:1; height:1px; background:var(--gray-200); }
+.history-week { background:var(--white); border:1px solid var(--gray-200); border-radius:10px; overflow:hidden; margin-bottom:8px; }
+.history-week-head { padding:13px 16px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; }
+.history-week-label { font-size:13px; font-weight:600; color:var(--gray-800); }
+.history-week-chev { font-size:11px; color:var(--gray-400); transition:transform .2s; }
+.history-week.open .history-week-chev { transform:rotate(180deg); }
+.history-week-body { display:none; border-top:1px solid var(--gray-100); }
+.history-week.open .history-week-body { display:block; }
+.history-row { display:flex; gap:10px; padding:9px 16px; border-bottom:1px solid var(--gray-100); }
+.history-row:last-child { border-bottom:none; }
+.history-day-label { color:var(--gray-400); width:28px; flex-shrink:0; font-size:10.5px; font-weight:700; text-transform:uppercase; padding-top:2px; }
+.history-meals { display:flex; flex-direction:column; gap:3px; flex:1; }
+.history-meal { display:flex; gap:6px; align-items:baseline; }
+.history-meal-type { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--gray-400); width:46px; flex-shrink:0; }
+.history-meal-name { color:var(--gray-700); font-size:12.5px; }
+.cal-empty { text-align:center; padding:36px 0; color:var(--gray-400); font-size:13px; }
+</style>
+</head>
+<body class="show-you">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">
+      <div class="topbar-icon">🥗</div>
+      <div>
+        <div class="topbar-title">Plan Nutricional</div>
+        <div class="topbar-sub">Lucía · 1550 kcal &nbsp;·&nbsp; Tú · 2000 kcal</div>
+      </div>
+    </div>
+    <div class="ptoggle" id="ptoggle-wrap">
+      <button class="pbtn" id="btn-lucia" onclick="setMode('lucia')">Lucía</button>
+      <button class="pbtn active" id="btn-you" onclick="setMode('you')">Tú</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN NAV -->
+<div class="mainnav">
+  <div class="mainnav-inner">
+    <button class="mnbtn active" id="mn-recetas" onclick="showPage('recetas',this)">🍽️ Recetas</button>
+    <button class="mnbtn" id="mn-semana" onclick="showPage('semana',this)">📅 Planificación semanal</button>
+  </div>
+</div>
+
+<!-- ═══ RECETAS PAGE ═══ -->
+<div class="page active" id="page-recetas">
+  <div class="tabnav">
+    <div class="tabnav-inner">
+      <button class="tbtn active" onclick="showTab('desayuno',this)"><span class="te">☀️</span>Desayuno</button>
+      <button class="tbtn" onclick="showTab('comida',this)"><span class="te">🍽️</span>Comida</button>
+      <button class="tbtn" onclick="showTab('snack',this)"><span class="te">🍫</span>Snack</button>
+      <button class="tbtn" onclick="showTab('cena',this)"><span class="te">🌙</span>Cena</button>
+    </div>
+  </div>
+  <main>
+    <div class="rsection active" id="tab-desayuno">
+      <div class="sec-intro">
+        <div class="sec-heading">Desayuno</div>
+        <div class="sec-desc">Elige una receta cada día.</div>
+        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~350 kcal</span><span class="kchip kchip-y">Tú · ~452 kcal</span></div>
+      </div>
+      <div class="recipe-list" id="list-desayuno"></div>
+    </div>
+    <div class="rsection" id="tab-comida">
+      <div class="sec-intro">
+        <div class="sec-heading">Comida</div>
+        <div class="sec-desc">Plato principal del día.</div>
+        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~625 kcal</span><span class="kchip kchip-y">Tú · ~806 kcal</span></div>
+      </div>
+      <div class="recipe-list" id="list-comida"></div>
+    </div>
+    <div class="rsection" id="tab-snack">
+      <div class="sec-intro">
+        <div class="sec-heading">Snack</div>
+        <div class="sec-desc">Un picoteo sencillo entre horas.</div>
+        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~105 kcal</span><span class="kchip kchip-y">Tú · ~135 kcal</span></div>
+      </div>
+      <div class="recipe-list" id="list-snack"></div>
+    </div>
+    <div class="rsection" id="tab-cena">
+      <div class="sec-intro">
+        <div class="sec-heading">Cena</div>
+        <div class="sec-desc">Cena ligera y equilibrada.</div>
+        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~472 kcal</span><span class="kchip kchip-y">Tú · ~608 kcal</span></div>
+      </div>
+      <div class="recipe-list" id="list-cena"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══ SEMANA PAGE ═══ -->
+<div class="page" id="page-semana">
+  <div class="cal-page">
+    <div class="cal-topbar">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="moveWeek(-1)">&#8592;</button>
+        <span class="cal-week-label" id="cal-week-label"></span>
+        <button class="cal-nav-btn" onclick="moveWeek(1)">&#8594;</button>
+      </div>
+      <button class="cal-today-btn" onclick="goToToday()">Esta semana</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="history-title">Semanas anteriores</div>
+    <div id="cal-history"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <select class="modal-select" id="modal-select"></select>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-confirm" onclick="saveSlot()">Guardar</button>
+      <button class="modal-btn modal-btn-clear" onclick="clearSlot()">Borrar</button>
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const SCALE = 2000 / 1550;
+
+const data = {
+desayuno: [
+  { name:"Bowl de yogur con caqui y pepitas de cacao", emoji:"🥣", time:"5 min", kcalL:349, protL:27, carbL:32, fatL:12,
+    ingredients:[{n:"YoPro Yogur Líquido (cualquier sabor)",q:"285 g"},{n:"Caqui",q:"95 g"},{n:"Pepitas de cacao",q:"20 g"}],
+    steps:["Vierte el yogur en un bowl y mezcla ligeramente.","Pela el caqui y córtalo en trocitos. Añade al bowl.","Reparte las pepitas de cacao por encima."]},
+  { name:"Tostadas con revuelto y tomates cherri", emoji:"🍳", time:"10 min", kcalL:349, protL:26, carbL:35, fatL:11,
+    ingredients:[{n:"Pan de centeno integral",q:"75 g"},{n:"Huevo entero",q:"100 g (2 pzas.)"},{n:"Claras de huevo pasteurizadas",q:"90 g"},{n:"Tomates cherri",q:"90 g"}],
+    steps:["Batir el huevo junto con las claras.","Cortar los tomates y mezclar con el huevo.","Cocinar en sartén al gusto. Salpimentar.","Tostar el pan y comer junto con el revuelto."]},
+  { name:"Pan de centeno con aguacate y pavo", emoji:"🥑", time:"5 min", kcalL:349, protL:25, carbL:34, fatL:12,
+    ingredients:[{n:"Pan de centeno integral",q:"50 g"},{n:"Aguacate fresco",q:"50 g"},{n:"Pechuga de pavo en lonchas",q:"100 g"},{n:"Fruta (cualquiera)",q:"120 g"}],
+    steps:["Tostar el pan, untar el aguacate y cubrir con el pavo.","Tomar la fruta aparte."]},
+  { name:"Tostadas de pavo con queso, miel y nueces", emoji:"🍯", time:"5 min", kcalL:352, protL:24, carbL:34, fatL:13,
+    ingredients:[{n:"Pan integral",q:"60 g"},{n:"Queso Fresco Burgos sin lactosa",q:"50 g"},{n:"Pavo en lonchas (mín. 85-90% carne)",q:"55 g"},{n:"Nueces naturales",q:"5 g"},{n:"Miel",q:"10 g"}],
+    steps:["Tostar el pan.","Cubrir con el pavo y el queso.","Añadir las nueces y un pelín de miel por encima."]},
+  { name:"Tostadas de jamón serrano, queso y manzana", emoji:"🧀", time:"10 min", kcalL:352, protL:27, carbL:35, fatL:11,
+    ingredients:[{n:"Pan integral",q:"50 g"},{n:"Queso fresco de Burgos 0% m.g.",q:"45 g"},{n:"Jamón serrano",q:"55 g"},{n:"Manzana",q:"110 g"}],
+    steps:["Tostar el pan si se desea.","Cubrir el pan con jamón y queso.","Disfrutar de la manzana aparte."]},
+  { name:"Tostada con huevos revueltos, pavo y aguacate", emoji:"🥚", time:"10 min", kcalL:349, protL:25, carbL:33, fatL:13,
+    ingredients:[{n:"Pan integral",q:"75 g"},{n:"Huevo entero",q:"50 g (1 pza.)"},{n:"Pechuga de pavo en lonchas",q:"55 g"},{n:"Aguacate fresco",q:"25 g"}],
+    steps:["Batir el huevo con sal y pimienta. Añadir el pavo en trocitos a la sartén.","Remover a fuego medio-alto hasta que espese.","Tostar el pan, untar el aguacate y cubrir con los huevos."]},
+  { name:"Huevos revueltos con jamón cocido", emoji:"🍳", time:"10 min", kcalL:337, protL:27, carbL:33, fatL:10,
+    ingredients:[{n:"Huevo entero",q:"1 unidad"},{n:"Claras de huevo pasteurizadas",q:"35 g"},{n:"Pan blanco",q:"2 lonchas"},{n:"Jamón cocido en lonchas",q:"3 lonchas"}],
+    steps:["Batir el huevo con las claras y sal. Cocinar en sartén a fuego medio removiendo hasta cuajar.","Tostar el pan. Servir los huevos revueltos con el jamón encima o al lado."]},
+  { name:"Pan con aguacate y lacón", emoji:"🥑", time:"5 min", kcalL:361, protL:26, carbL:34, fatL:13,
+    ingredients:[{n:"Pan blanco",q:"70 g"},{n:"Aguacate fresco",q:"40 g"},{n:"Lacón cortado a mano Hacendado",q:"100 g"}],
+    steps:["Tostar el pan si se desea.","Untar el aguacate y cubrir con el lacón."]},
+  { name:"Brunch de patata, huevo y muslito de pollo", emoji:"🍳", time:"20 min", kcalL:355, protL:25, carbL:35, fatL:13,
+    ingredients:[{n:"Patata mediana",q:"200 g"},{n:"Huevo entero",q:"1 unidad"},{n:"Aceite de oliva",q:"3 g"},{n:"Claras de huevo pasteurizadas",q:"30 g"},{n:"Muslito de Pollo La Carloteña",q:"65 g"}],
+    steps:["Cocer o hornear la patata. Cocinar el muslito al horno o a la plancha.","Hacer el huevo con las claras a la plancha con un pelín de aceite.","Servir todo junto."]},
+  { name:"Overnight oats con manzana y arándanos", emoji:"🌙", time:"5 min + noche", kcalL:347, protL:27, carbL:34, fatL:11,
+    ingredients:[{n:"Avena",q:"30 g"},{n:"Bebida de almendras sin azúcar Alpro",q:"210 ml"},{n:"Proteína vegana en polvo",q:"30 g"},{n:"Manzana",q:"65 g"},{n:"Arándanos",q:"40 g"},{n:"Chocolate negro 85%",q:"10 g"},{n:"Canela",q:"al gusto"}],
+    steps:["Mezclar la avena con la bebida vegetal.","Reposar en nevera toda la noche (mín. 6-8 h).","Por la mañana añadir los toppings: manzana, arándanos y chocolate."]},
+  { name:"Kéfir con kiwi, pasas y anacardos", emoji:"🥝", time:"5 min", kcalL:349, protL:26, carbL:34, fatL:11,
+    ingredients:[{n:"Kéfir Natural 1.5% de grasa",q:"110 ml"},{n:"Proteína de suero de leche en polvo",q:"25 g"},{n:"Kiwi",q:"55 g"},{n:"Pasas",q:"20 g"},{n:"Anacardos naturales",q:"20 g"}],
+    steps:["Mezclar el kéfir con la proteína en polvo.","Cortar el kiwi y echarlo al bol junto con las pasas y los anacardos."]},
+  { name:"Leche con muesli y proteína", emoji:"🥣", time:"5 min", kcalL:349, protL:26, carbL:34, fatL:11,
+    ingredients:[{n:"Leche semidesnatada 2%",q:"205 ml"},{n:"Proteína de suero de leche en polvo",q:"20 g"},{n:"Crunchy Muesli Chocolate (Lidl)",q:"35 g"}],
+    steps:["Mezclar la proteína con la leche hasta disolver.","Echar el muesli y disfrutar."]},
+  { name:"Yogur griego con avena y frutas del bosque", emoji:"🫐", time:"5 min", kcalL:349, protL:26, carbL:34, fatL:11,
+    ingredients:[{n:"Yogur griego 2% de grasa",q:"275 g"},{n:"Bebida de almendras sin azúcar",q:"45 ml"},{n:"Avena sin gluten",q:"20 g"},{n:"Semillas de chía",q:"15 g"},{n:"Arándanos",q:"40 g"},{n:"Frambuesas",q:"40 g"}],
+    steps:["Mezclar el yogur con la avena y las semillas de chía.","Cubrir con las frutas del bosque y servir."]},
+  { name:"Pan con aguacate y lomo", emoji:"🥩", time:"5 min", kcalL:349, protL:25, carbL:33, fatL:12,
+    ingredients:[{n:"Pan integral",q:"55 g"},{n:"Aguacate fresco",q:"45 g"},{n:"Lomo embuchado",q:"50 g"},{n:"Manzana",q:"90 g"}],
+    steps:["Tostar el pan. Cubrir con el aguacate y el lomo.","Comer la fruta aparte."]},
+  { name:"Pan tostado con jamón serrano y kiwi", emoji:"🍞", time:"5 min", kcalL:349, protL:25, carbL:33, fatL:12,
+    ingredients:[{n:"Pan integral",q:"50 g"},{n:"Queso cottage 0% m.g.",q:"35 g"},{n:"Jamón serrano",q:"55 g"},{n:"Kiwi",q:"95 g"}],
+    steps:["Tostar el pan.","Untar el queso cottage y cubrir con el jamón.","Comer el kiwi aparte."]},
+  { name:"Pan con queso fresco y jamón cocido", emoji:"🥖", time:"5 min", kcalL:349, protL:25, carbL:33, fatL:12,
+    ingredients:[{n:"Baguette sin gluten Mercadona",q:"55 g"},{n:"Queso Fresco Burgos sin lactosa",q:"25 g"},{n:"Jamón cocido en lonchas",q:"115 g"},{n:"Mandarina",q:"90 g"}],
+    steps:["Tostar el pan. Extender el queso y cubrir con el jamón cocido.","Comer la fruta aparte."]},
+],
+comida: [
+  { name:"Dorada con verduras y boniato", emoji:"🐟", time:"25 min", kcalL:619, protL:47, carbL:63, fatL:19,
+    ingredients:[{n:"Dorada cruda",q:"175 g"},{n:"Boniato congelado",q:"175 g"},{n:"Brócoli",q:"185 g"},{n:"Coliflor",q:"140 g"},{n:"Zanahorias",q:"80 g"}],
+    steps:["Poner el boniato en la airfryer a 200°C 15 minutos.","Hacer las verduras al vapor.","Cocinar la dorada a la plancha."]},
+  { name:"Gnocchi con pollo y verduras al curry", emoji:"🍝", time:"25 min", kcalL:631, protL:51, carbL:61, fatL:20,
+    ingredients:[{n:"Gnocchi de patatas",q:"150 g"},{n:"Pechuga de pollo cruda",q:"185 g"},{n:"Pimiento rojo",q:"50 g"},{n:"Pimiento amarillo",q:"50 g"},{n:"Pimiento verde",q:"50 g"},{n:"Cebolla blanca",q:"55 g"},{n:"Queso 16% de grasa",q:"25 g"},{n:"Aceite de oliva",q:"10 g"}],
+    steps:["Calentar sartén con aceite y especias de curry.","Cortar verduras en juliana y cocinar a fuego lento.","Cuando estén blandas, añadir el pollo salpimentado.","Cocinar los gnocchi al gusto. Servir con el queso."]},
+  { name:"Bowl de alubias, arroz y huevo", emoji:"🫘", time:"25 min", kcalL:619, protL:48, carbL:61, fatL:20,
+    ingredients:[{n:"Alubias negras en conserva",q:"190 g"},{n:"Arroz blanco cocido",q:"115 g"},{n:"Huevo entero",q:"120 g (2 pzas.)"},{n:"Aceite de oliva",q:"5 g"},{n:"+Proteínas Postre Lácteo Hacendado (postre)",q:"175 g"},{n:"Pimentón y pimienta negra",q:"al gusto"}],
+    steps:["Saltear las alubias con pimentón y pimienta.","Añadir el arroz caliente.","Hacer los huevos a la plancha o escalfados.","Servir con aceite. Comer el yogur de postre."]},
+  { name:"Pasta de pavo con verduras", emoji:"🍝", time:"40 min", kcalL:625, protL:48, carbL:67, fatL:18,
+    ingredients:[{n:"Pasta sin gluten cruda",q:"65 g"},{n:"Carne de pavo picada máx. 5% grasa",q:"170 g"},{n:"Calabacín",q:"170 g"},{n:"Tomate troceado en conserva",q:"135 g"},{n:"Pimiento rojo",q:"90 g"},{n:"Aceite de oliva",q:"5 g"},{n:"Albahaca seca",q:"al gusto"}],
+    steps:["Freír la carne picada. Añadir pimiento y dorar.","Añadir el calabacín, los tomates y las especias. Cocer 15 min a fuego lento.","Cocer la pasta. Servir con la salsa."]},
+  { name:"Atún encebollado con tomates cherry y arroz", emoji:"🐟", time:"25 min", kcalL:625, protL:48, carbL:65, fatL:18,
+    ingredients:[{n:"Atún fresco crudo",q:"155 g"},{n:"Arroz basmati crudo",q:"70 g"},{n:"Cebolla blanca",q:"110 g"},{n:"Tomates cherri",q:"70 g"},{n:"Aceite de oliva",q:"15 g"},{n:"Vino blanco para cocinar",q:"30 ml"},{n:"Laurel y perejil",q:"al gusto"}],
+    steps:["Sellar los dados de atún en sartén con aceite. Reservar.","Rehogar ajo y cebolla en juliana. Verter el vino y reducir.","Añadir los tomates y el atún. Salpimentar 2-3 min más.","Servir con arroz cocido y perejil picado."]},
+  { name:"Ternera con patatas al horno, calabacín y huevo", emoji:"🥩", time:"30 min", kcalL:631, protL:47, carbL:66, fatL:19,
+    ingredients:[{n:"Solomillo de ternera",q:"105 g"},{n:"Patata mediana",q:"340 g"},{n:"Calabacín",q:"215 g"},{n:"Huevo entero",q:"110 g (2 pzas.)"},{n:"Aceite de oliva",q:"5 g"}],
+    steps:["Precalentar horno a 200°C. Cortar patatas y calabacín. Hornear 20-25 min.","Cocinar la ternera 2-3 min por cada lado.","Hacer el huevo a la plancha o escalfado. Servir todo junto."]},
+  { name:"Pollo con arroz, calabacín y leche de coco", emoji:"🥥", time:"25 min", kcalL:619, protL:47, carbL:64, fatL:19,
+    ingredients:[{n:"Pechuga de pollo cruda",q:"180 g"},{n:"Arroz basmati crudo",q:"65 g"},{n:"Calabacín",q:"330 g"},{n:"Leche de coco light 6-7% grasa",q:"85 ml"},{n:"Aceite de oliva",q:"10 g"},{n:"Cúrcuma molida",q:"1 cdta."}],
+    steps:["Dorar el pollo y el calabacín en aceite.","Añadir la cúrcuma y la leche de coco. Cocinar 5-7 min.","Cocinar el arroz aparte. Servir todo junto."]},
+  { name:"Acelgas con patatas, huevo y salmón a la plancha", emoji:"🐠", time:"25 min", kcalL:619, protL:47, carbL:63, fatL:19,
+    ingredients:[{n:"Salmón salvaje del Pacífico crudo",q:"125 g"},{n:"Acelgas crudas",q:"425 g"},{n:"Patata mediana",q:"260 g"},{n:"Huevo entero",q:"60 g (1 pza.)"},{n:"Zanahorias",q:"60 g"},{n:"Aceite de oliva",q:"5 g"},{n:"Harina de trigo",q:"10 g"},{n:"Pimentón",q:"1 cdta."}],
+    steps:["Limpiar y picar las acelgas. Trocear patatas y zanahorias.","Cocer las hortalizas 15-18 min. Cocer el huevo aparte.","Rehogar con ajo, harina y pimentón. Incorporar las hortalizas.","Hacer el salmón a la plancha. Servir todo junto."]},
+  { name:"Hamburguesa de pollo con boniato y espárragos", emoji:"🍔", time:"20 min", kcalL:619, protL:47, carbL:63, fatL:19,
+    ingredients:[{n:"Hamburguesa de pollo Hacendado",q:"250 g"},{n:"Boniato",q:"245 g"},{n:"Espárragos trigueros",q:"245 g"},{n:"Tomates",q:"125 g"},{n:"Aceite de oliva",q:"5 g"}],
+    steps:["Cortar el boniato en bastones. Airfryer a 180°C 15 min.","Cocinar los espárragos en sartén. Hacer las hamburguesas 5 min por lado.","Servir con rodajas de tomate."]},
+  { name:"Habas con jamón, huevo y patatas", emoji:"🫛", time:"30 min", kcalL:619, protL:47, carbL:63, fatL:19,
+    ingredients:[{n:"Habas en conserva",q:"300 g"},{n:"Patata mediana",q:"250 g"},{n:"Huevo entero",q:"150 g (3 pzas.)"},{n:"Taquitos de Jamón Incarlopsa",q:"20 g"},{n:"Cebolla blanca",q:"50 g"},{n:"Vino blanco para cocinar",q:"5 ml"}],
+    steps:["Rehogar cebolla y ajo. Añadir el jamón 2 min.","Añadir vino y evaporar. Incorporar las habas y cocer.","Cocinar las patatas al horno. Freír un huevo. Servir todo."]},
+  { name:"Ensalada de alcachofas, quinoa, pollo y parmesano", emoji:"🥗", time:"20 min", kcalL:619, protL:47, carbL:63, fatL:19,
+    ingredients:[{n:"Quinoa cruda",q:"95 g"},{n:"Pechuga de pollo cruda",q:"140 g"},{n:"Corazones de alcachofa en agua",q:"140 g"},{n:"Parmesano 28-30% grasa",q:"30 g"}],
+    steps:["Cocer la quinoa 12 min.","Cocinar el pollo a la plancha y cortar en tiras.","Mezclar quinoa, alcachofas y pollo. Añadir el parmesano en lascas."]},
+  { name:"Fideos de arroz con pollo y salsa de cacahuete", emoji:"🍜", time:"15 min", kcalL:619, protL:47, carbL:63, fatL:19,
+    ingredients:[{n:"Noodles de arroz crudos",q:"55 g"},{n:"Pechuga de pollo cruda",q:"185 g"},{n:"Pimiento rojo",q:"85 g"},{n:"Pimiento verde",q:"85 g"},{n:"Cebolla blanca",q:"115 g"},{n:"Crema de cacahuete",q:"15 g"},{n:"Salsa de soja baja en sodio",q:"al gusto"},{n:"Aceite de oliva",q:"5 g"}],
+    steps:["Cortar las verduras en juliana fina y cocinar a fuego lento.","Cocinar el pollo salpimentado. Cocer los noodles.","Mezclar soja y crema de cacahuete para la salsa. Servir todo."]},
+  { name:"Filete de ternera con brócoli y arroz", emoji:"🥦", time:"40 min", kcalL:619, protL:47, carbL:63, fatL:19,
+    ingredients:[{n:"Entrecot de ternera magro crudo",q:"150 g"},{n:"Arroz vaporizado",q:"75 g"},{n:"Brócoli",q:"185 g"},{n:"Aceite de oliva",q:"10 g"}],
+    steps:["Trocear el brócoli, añadir sal y especias. Hornear a 200°C 30 min.","Cocer el arroz según instrucciones.","Salpimentar el filete y dorar en sartén con aceite. Servir todo."]},
+  { name:"Lenguado con pisto y arroz", emoji:"🐟", time:"30 min", kcalL:619, protL:47, carbL:63, fatL:19,
+    ingredients:[{n:"Lenguado o solla fresco sin piel crudo",q:"330 g"},{n:"Arroz blanco crudo",q:"65 g"},{n:"Calabacín",q:"90 g"},{n:"Berenjena",q:"110 g"},{n:"Cebolla amarilla",q:"55 g"},{n:"Tomate troceado en conserva",q:"120 g"},{n:"Aceite de oliva",q:"10 g"},{n:"Romero seco",q:"al gusto"}],
+    steps:["Cocer el arroz. Cortar las verduras en dados.","Rehogar ajo y cebolla. Añadir las verduras 5 min. Añadir tomate y cocer 10 min.","Cocinar el lenguado en sartén por ambos lados. Servir con el pisto y el arroz."]},
+  { name:"Arroz tres delicias con pollo", emoji:"🍳", time:"25 min", kcalL:639, protL:49, carbL:68, fatL:18,
+    ingredients:[{n:"Arroz blanco crudo",q:"60 g"},{n:"Contramuslos de pollo deshuesados y sin piel",q:"160 g"},{n:"Huevo entero",q:"1 unidad"},{n:"Claras de huevo pasteurizadas",q:"30 g"},{n:"Cebolla blanca",q:"30 g"},{n:"Zanahorias",q:"30 g"},{n:"Pimiento rojo",q:"60 g"},{n:"Brócoli",q:"60 g"},{n:"Salsa hoisin",q:"20 ml"},{n:"Aceite de oliva",q:"3 g"}],
+    steps:["Cocer el arroz y dejar enfriar (mejor del día anterior).","Saltear el pollo en trozos con aceite. Añadir las verduras picadas finas.","Añadir el arroz y remover a fuego fuerte.","Hacer un hueco, cuajar el huevo con las claras batidas y mezclar.","Añadir la salsa hoisin y servir caliente."]},
+  { name:"Arroz al curry con pollo y alcachofas", emoji:"🍛", time:"30 min", kcalL:609, protL:46, carbL:69, fatL:16,
+    ingredients:[{n:"Arroz blanco crudo",q:"75 g"},{n:"Muslo de pollo sin hueso y sin piel crudo",q:"190 g"},{n:"Corazones de alcachofa en agua",q:"140 g"},{n:"Leche de coco light 6-7% grasa",q:"100 ml"},{n:"Leche de coco 15-18% grasa",q:"1 ml"}],
+    steps:["Cocer el arroz aparte.","Cocinar el pollo en trozos en sartén. Añadir el curry y las alcachofas escurridas.","Añadir la leche de coco y cocinar 5-7 min a fuego medio hasta que reduzca.","Servir el pollo sobre el arroz."]},
+  { name:"Albóndigas con verduras", emoji:"🍖", time:"40 min", kcalL:660, protL:47, carbL:68, fatL:22,
+    ingredients:[{n:"Carne de ternera cruda",q:"150 g"},{n:"Pan rallado",q:"10 g"},{n:"Claras de huevo pasteurizadas",q:"30 g"},{n:"Pan blanco",q:"1 g"},{n:"Leche entera",q:"1 ml"},{n:"Aceite de oliva",q:"10 g"},{n:"Puerro",q:"120 g"},{n:"Cebolla blanca",q:"120 g"},{n:"Zanahorias",q:"75 g"},{n:"Pimiento rojo",q:"75 g"},{n:"Pimiento verde",q:"75 g"}],
+    steps:["Mezclar la carne con el pan rallado, las claras, sal y pimienta. Formar albóndigas.","Dorar las albóndigas en sartén con aceite. Reservar.","En la misma sartén, pochar el puerro, la cebolla y las verduras picadas.","Añadir las albóndigas a las verduras. Cocinar 15-20 min a fuego lento."]},
+  { name:"Guisantes con jamón", emoji:"🌿", time:"30 min", kcalL:642, protL:47, carbL:65, fatL:22,
+    ingredients:[{n:"Guisantes congelados",q:"230 g"},{n:"Taquitos de Jamón Incarlopsa",q:"20 g"},{n:"Cebolla blanca",q:"50 g"},{n:"Patata mediana",q:"220 g"},{n:"Huevo entero",q:"3 unidades"},{n:"Pimentón",q:"al gusto"}],
+    steps:["Rehogar la cebolla con un pelín de aceite. Añadir el jamón 2 min.","Añadir los guisantes y las patatas troceadas. Cubrir con agua y cocer 20 min.","Añadir el pimentón. Freír los huevos aparte y servir con el guiso."]},
+  { name:"Ensaladilla ruso campera", emoji:"🥗", time:"30 min", kcalL:613, protL:51, carbL:67, fatL:15,
+    ingredients:[{n:"Patata mediana",q:"250 g"},{n:"Atún en agua en lata",q:"110 g"},{n:"Huevo entero",q:"1 unidad"},{n:"Langostinos crudos ultracongelados",q:"50 g"},{n:"Mayonesa light 26-28% grasa",q:"20 g"},{n:"Pimiento rojo",q:"80 g"},{n:"Pimiento verde",q:"80 g"},{n:"Tomates",q:"120 g"},{n:"Cebolla blanca",q:"40 g"},{n:"Pepinillos agridulces en frasco",q:"30 g"}],
+    steps:["Cocer la patata y el huevo. Cocer los langostinos.","Escurrir el atún. Picar todas las verduras en dados pequeños.","Mezclar todo con la mayonesa. Servir frío."]},
+],
+snack: [
+  { name:"Chocolate negro 85%", emoji:"🍫", time:"1 min", kcalL:104, protL:2, carbL:3, fatL:10,
+    ingredients:[{n:"Chocolate negro 85-86% cacao",q:"15 g"}],
+    steps:["Comer el trozo de chocolate. 🙂"]},
+],
+cena: [
+  { name:"Hamburguesa con bacon y patatas al micro", emoji:"🍔", time:"20 min", kcalL:472, protL:35, carbL:46, fatL:16,
+    ingredients:[{n:"Carne picada de vacuno 3-7% grasa cruda",q:"100 g"},{n:"Pan de hamburguesa con sésamo",q:"45 g"},{n:"Bacon en lonchas",q:"40 g"},{n:"Patatas con piel asadas",q:"95 g"},{n:"Ketchup Heinz",q:"20 g"}],
+    steps:["Freír el bacon hasta crujiente. Reservar en papel absorbente.","Salpimentar la carne y hacer hamburguesas. Freír en la misma sartén.","Tostar el pan. Montar la hamburguesa con el beicon y el ketchup. Servir con las patatas."]},
+  { name:"Crema de espárragos y bocadillo de pavo", emoji:"🥣", time:"10 min", kcalL:472, protL:35, carbL:46, fatL:16,
+    ingredients:[{n:"Crema de espárragos Hacendado",q:"290 g"},{n:"Pan integral",q:"65 g"},{n:"Pechuga de pavo en lonchas",q:"70 g"},{n:"Queso Havarti Light Hacendado",q:"45 g"}],
+    steps:["Calentar la crema de espárragos.","Preparar el bocadillo con el queso y el pavo. Comer aparte."]},
+  { name:"Ensalada de pimientos con atún y aguacate", emoji:"🥗", time:"5 min", kcalL:472, protL:35, carbL:46, fatL:16,
+    ingredients:[{n:"Atún en agua en lata",q:"105 g"},{n:"Pimientos en frasco",q:"220 g"},{n:"Aguacate fresco",q:"65 g"},{n:"Maíz en conserva",q:"45 g"},{n:"Pan integral",q:"45 g"},{n:"Naranja o fruta",q:"130 g"}],
+    steps:["Escurrir los pimientos, el maíz y el atún. Cortar el aguacate en dados.","Servir todo junto en un plato y acompañar con el pan.","Tomar la fruta de postre."]},
+  { name:"Huevos fritos con jamón serrano y ensalada de cottage", emoji:"🥚", time:"15 min", kcalL:472, protL:34, carbL:46, fatL:17,
+    ingredients:[{n:"Chapata",q:"75 g"},{n:"Huevo entero",q:"75 g (1 pza.)"},{n:"Jamón serrano",q:"25 g"},{n:"Cottage Cheese 4%",q:"75 g"},{n:"Tomate",q:"60 g"},{n:"Lechuga romana",q:"60 g"},{n:"Cebolla morada",q:"30 g"},{n:"Vinagre balsámico",q:"2 cdtas."}],
+    steps:["Cortar el pan. Cocinar el huevo con el jamón 2 min por lado.","Hacer la ensalada: lechuga, tomate, cottage y cebolla. Aliñar con vinagre.","Servir el huevo con el jamón, la ensalada y el pan."]},
+  { name:"Crema de verduras, pollo y arroz", emoji:"🍲", time:"15 min", kcalL:472, protL:34, carbL:47, fatL:16,
+    ingredients:[{n:"Crema de verduras Hacendado",q:"240 g"},{n:"Pechuga de pollo cruda",q:"150 g"},{n:"Arroz blanco cocido",q:"120 g"},{n:"Aceite de oliva",q:"5 g"}],
+    steps:["Cocinar el pollo en sartén con aceite y especias.","Calentar el puré de verduras aparte.","Servir el pollo con el arroz y el puré."]},
+  { name:"Ensalada de pollo, tomate, feta y mango", emoji:"🥭", time:"20 min", kcalL:472, protL:34, carbL:46, fatL:16,
+    ingredients:[{n:"Pechuga de pollo cruda",q:"95 g"},{n:"Tomates",q:"180 g"},{n:"Mango",q:"90 g"},{n:"Feta 25% grasa",q:"45 g"},{n:"Cebolla morada",q:"45 g"},{n:"Pan integral",q:"50 g"}],
+    steps:["Cortar tomates, mango y cebolla. Desmenuzar el feta. Mezclar y sazonar.","Freír el pollo 10 min por ambos lados. Servir con la ensalada y el pan."]},
+  { name:"Huevos rotos con pavo, zanahorias y tahín", emoji:"🥕", time:"15 min", kcalL:468, protL:33, carbL:47, fatL:16,
+    ingredients:[{n:"Pechuga de pavo cruda",q:"95 g"},{n:"Patata mediana",q:"165 g"},{n:"Zanahorias",q:"195 g"},{n:"Huevo entero",q:"40 g (1 pza.)"},{n:"Tahini",q:"15 g"}],
+    steps:["Hacer las patatas al horno o airfryer.","Cocer las zanahorias en microondas con aceite y sal 10-12 min.","Cocinar los huevos y el pavo a la plancha.","Servir las patatas con el pavo y los huevos. Acompañar las zanahorias con el tahín."]},
+  { name:"Caballa al horno con patata, pimientos y salsa de yogur", emoji:"🐡", time:"40 min", kcalL:472, protL:34, carbL:46, fatL:16,
+    ingredients:[{n:"Caballa fresca",q:"85 g"},{n:"Patata mediana",q:"195 g"},{n:"Pimiento rojo",q:"90 g"},{n:"Calabacín",q:"90 g"},{n:"Yogur Total 0% Fage",q:"110 g"},{n:"Aceite de oliva",q:"5 g"},{n:"Limón, ajo en polvo, comino, pimentón",q:"al gusto"}],
+    steps:["Precalentar horno a 200°C. Cortar patata y verduras en cubos.","Asar con aceite 30 min. Añadir la caballa y hornear 8-10 min más.","Mezclar el yogur con limón y especias. Servir como salsa."]},
+  { name:"Cuscús con salteado de pollo y verduras", emoji:"🫙", time:"20 min", kcalL:472, protL:34, carbL:46, fatL:16,
+    ingredients:[{n:"Cuscús crudo",q:"55 g"},{n:"Muslo de pollo sin hueso y sin piel crudo",q:"145 g"},{n:"Pimiento rojo",q:"85 g"},{n:"Zanahorias",q:"70 g"},{n:"Aceite de oliva",q:"10 g"}],
+    steps:["Hervir el doble de agua que de cuscús. Verter sobre el cuscús con sal, tapar 10 min.","Cocinar las verduras y el pollo en tiras en sartén.","Mezclar y servir con el cuscús."]},
+  { name:"Pizza de carne picada, calabacín y tomate", emoji:"🍕", time:"25 min", kcalL:472, protL:34, carbL:46, fatL:16,
+    ingredients:[{n:"Masa de pizza integral precocinada",q:"95 g"},{n:"Carne picada de vacuno 3-7% grasa",q:"70 g"},{n:"Mozzarella rallada 24-25% grasa",q:"30 g"},{n:"Calabacín",q:"60 g"},{n:"Tomates",q:"60 g"},{n:"Orégano seco",q:"al gusto"}],
+    steps:["Precalentar horno a 200°C. Extender la masa en bandeja.","Dorar la carne picada en sartén. Cortar las verduras en dados.","Añadir queso, carne y verduras a la masa. Hornear 10 min."]},
+  { name:"Crema de verduras y lubina a la plancha", emoji:"🥣", time:"35 min", kcalL:472, protL:34, carbL:46, fatL:16,
+    ingredients:[{n:"Filete de lubina con piel crudo",q:"110 g"},{n:"Calabacín",q:"135 g"},{n:"Zanahorias",q:"125 g"},{n:"Patata mediana",q:"125 g"},{n:"Calabaza",q:"90 g"},{n:"Brócoli",q:"65 g"},{n:"Puerro",q:"25 g"},{n:"Aceite de oliva",q:"5 g"},{n:"Pastilla de caldo",q:"1 dado"}],
+    steps:["Trocear todas las verduras. Rehogar el puerro en aceite.","Añadir el resto de verduras, cubrir con agua, añadir pastilla de caldo y sal. Cocer.","Cocinar la lubina en sartén con aceite y ajo. Batir la crema con batidora."]},
+  { name:"Huevos rotos con pimientos de padrón y gulas", emoji:"🍳", time:"25 min", kcalL:472, protL:34, carbL:46, fatL:16,
+    ingredients:[{n:"Huevo entero",q:"115 g (2 pzas.)"},{n:"Claras de huevo pasteurizadas",q:"130 g"},{n:"Patata mediana",q:"185 g"},{n:"Pimientos de padrón",q:"230 g"},{n:"La gula del norte La Auténtica",q:"35 g"}],
+    steps:["Cocinar las patatas al horno o airfryer.","Cocinar los pimientos a la plancha. Después las gulas.","Cocinar los huevos y las claras a la plancha.","Servir todo en un plato."]},
+  { name:"Ensalada templada de boniato con langostinos", emoji:"🦐", time:"30 min", kcalL:472, protL:34, carbL:46, fatL:16,
+    ingredients:[{n:"Boniato",q:"205 g"},{n:"Langostinos crudos ultracongelados",q:"125 g"},{n:"Aguacate fresco",q:"50 g"},{n:"Tomates cherri",q:"80 g"},{n:"Canónigos",q:"40 g"},{n:"Cebolla morada",q:"30 g"},{n:"Pipas de calabaza",q:"10 g"}],
+    steps:["Cocer el boniato con piel 20-25 min. Pelar y cortar en dados.","Pelar los langostinos. Preparar todos los ingredientes.","Montar el bol: boniato templado, langostinos, canónigos, tomates, aguacate y cebolla. Añadir las pipas al final. Aliñar."]},
+  { name:"Huevos revueltos con espárragos y jamón", emoji:"🌿", time:"10 min", kcalL:472, protL:34, carbL:46, fatL:16,
+    ingredients:[{n:"Huevo entero",q:"85 g (2 pzas.)"},{n:"Claras de huevo pasteurizadas",q:"95 g"},{n:"Espárragos trigueros",q:"155 g"},{n:"Taquitos de Jamón Incarlopsa",q:"25 g"},{n:"Pan integral",q:"50 g"},{n:"Manzana",q:"115 g"},{n:"Aceite de oliva",q:"5 g"}],
+    steps:["Limpiar los espárragos y saltear con ajo en aceite 2-4 min.","Batir los huevos con las claras y sal. Añadir a la sartén y remover a fuego lento.","Decorar con tiras de jamón. Servir con pan y tomar la fruta de postre."]},
+  { name:"Ensalada de tomate y atún con pan de ajo", emoji:"🥗", time:"5 min", kcalL:452, protL:35, carbL:37, fatL:18,
+    ingredients:[{n:"Pan de ajo",q:"50 g"},{n:"Atún en agua en lata",q:"120 g"},{n:"Tomates",q:"300 g"},{n:"Pimientos en lata",q:"100 g"},{n:"Aceite de oliva",q:"2 cucharaditas"}],
+    steps:["Cortar los tomates en rodajas. Escurrir el atún y los pimientos.","Montar la ensalada con el atún y los pimientos encima del tomate.","Aliñar con aceite y sal. Acompañar con el pan de ajo."]},
+  { name:"Pisto con patatas y bacalao", emoji:"🐟", time:"35 min", kcalL:427, protL:34, carbL:45, fatL:12,
+    ingredients:[{n:"Filete de bacalao sin piel crudo",q:"155 g"},{n:"Patata mediana",q:"200 g"},{n:"Cebolla blanca",q:"45 g"},{n:"Pimiento rojo",q:"33 g"},{n:"Pimiento verde",q:"22 g"},{n:"Calabacín",q:"67 g"},{n:"Tomate triturado",q:"55 g"},{n:"Aceite de oliva",q:"10 g"}],
+    steps:["Pochar la cebolla con aceite. Añadir los pimientos y el calabacín en dados.","Añadir el tomate triturado y cocer el pisto 10-15 min a fuego lento.","Cocer las patatas aparte (al horno o hervidas).","Cocinar el bacalao a la plancha 3-4 min por lado. Servir todo junto."]},
+],
+};
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function scaleQty(q) {
+  if (!q) return q;
+  const lo = q.toLowerCase();
+  if (lo === 'al gusto' || lo.includes('pizca') || lo === '1 cdta.' || lo === '1 dado') return q;
+  const m = q.match(/^(\d+(?:[.,]\d+)?)\s*(.*)/);
+  if (!m) return q;
+  return `${Math.round(parseFloat(m[1].replace(',','.')) * SCALE)} ${m[2]}`.trim();
+}
+
+function render(listId, recipes) {
+  document.getElementById(listId).innerHTML = recipes.map((r,i) => {
+    const ky=Math.round(r.kcalL*SCALE), py=Math.round(r.protL*SCALE), cy=Math.round(r.carbL*SCALE), fy=Math.round(r.fatL*SCALE);
+    const ings = r.ingredients.map(ing => `<tr><td class="iname">${ing.n}</td><td class="iql">${ing.q}</td><td class="iqy">${scaleQty(ing.q)}</td></tr>`).join('');
+    const steps = r.steps.map((s,j) => `<div class="step"><span class="stepn">${j+1}</span><span>${s}</span></div>`).join('');
+    return `<div class="rrow" style="animation-delay:${i*.04}s" onclick="toggleRow(this)">
+      <div class="rhead">
+        <div class="remoji">${r.emoji}</div>
+        <div class="rinfo">
+          <div class="rname">${r.name}</div>
+          <div class="rmeta">
+            <span class="rtime">⏱ ${r.time}</span>
+            <div class="mtags">
+              <span class="mtag mtag-l">${r.kcalL} kcal · ${r.protL}p · ${r.carbL}c · ${r.fatL}g</span>
+              <span class="mtag mtag-y">${ky} kcal · ${py}p · ${cy}c · ${fy}g</span>
+            </div>
+          </div>
+        </div>
+        <span class="chev">▾</span>
+      </div>
+      <div class="rbody"><div class="rbody-inner">
+        <div>
+          <div class="bsec-title">Ingredientes</div>
+          <table class="itbl"><thead><tr><th></th><th class="col-l">Lucía</th><th class="col-y">Tú</th></tr></thead><tbody>${ings}</tbody></table>
+        </div>
+        <div>
+          <div class="bsec-title">Preparación</div>
+          <div class="steps">${steps}</div>
+        </div>
+      </div></div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRow(el) { el.classList.toggle('open'); }
+function setMode(m) {
+  document.body.className = 'show-' + m;
+  document.getElementById('btn-lucia').classList.toggle('active', m==='lucia');
+  document.getElementById('btn-you').classList.toggle('active', m==='you');
+}
+function showTab(id, btn) {
+  document.querySelectorAll('.rsection').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mnbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  // Show/hide person toggle (not needed on semana, same plan for both)
+  document.getElementById('ptoggle-wrap').style.display = (id==='semana') ? 'none' : '';
+  if (id==='semana') renderCalendar();
+}
+
+// ─── CALENDAR ────────────────────────────────────────────────────────────────
+const DAYS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+let weekStart = getMonday(new Date());
+let modalCtx = null;
+let plan = {};
+
+async function loadPlan() {
+  try { const r = await window.storage.get('cal-plan'); if(r&&r.value) plan=JSON.parse(r.value); } catch(e){}
+}
+async function savePlan() {
+  try { await window.storage.set('cal-plan', JSON.stringify(plan)); } catch(e){}
+}
+function getMonday(d) {
+  const dt=new Date(d); const day=dt.getDay(); dt.setDate(dt.getDate()+(day===0?-6:1-day)); dt.setHours(0,0,0,0); return dt;
+}
+function dk(d) { return d.toISOString().slice(0,10); }
+function addD(d,n) { const dt=new Date(d); dt.setDate(dt.getDate()+n); return dt; }
+function fmtW(mon) {
+  const sun=addD(mon,6);
+  return mon.getMonth()===sun.getMonth()
+    ? `${mon.getDate()}–${sun.getDate()} de ${MONTHS[mon.getMonth()]} ${mon.getFullYear()}`
+    : `${mon.getDate()} ${MONTHS[mon.getMonth()]} – ${sun.getDate()} ${MONTHS[sun.getMonth()]} ${sun.getFullYear()}`;
+}
+function isToday(d) { const t=new Date(); t.setHours(0,0,0,0); return d.getTime()===t.getTime(); }
+
+function renderCalendar() {
+  document.getElementById('cal-week-label').textContent = fmtW(weekStart);
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  for (let i=0;i<7;i++) {
+    const day=addD(weekStart,i); const key=dk(day); const dd=plan[key]||{};
+    const todayCls=isToday(day)?' today':'';
+    const mkSlot=(meal,emoji,label)=> dd[meal]
+      ? `<div class="cal-slot filled slot-${meal}" onclick="openModal('${key}','${meal}');event.stopPropagation()">
+           <div class="slot-label">${label}</div><div class="slot-name">${dd[meal]}</div></div>`
+      : `<div class="cal-slot" onclick="openModal('${key}','${meal}');event.stopPropagation()">
+           <div class="slot-empty-icon">${emoji}</div><div class="slot-empty-txt">${label}</div></div>`;
+    grid.innerHTML += `<div class="cal-day${todayCls}">
+      <div class="cal-day-head"><div class="cal-day-name">${DAYS[i]}</div><div class="cal-day-num">${day.getDate()}</div></div>
+      <div class="cal-day-meals">${mkSlot('comida','🍽️','Comida')}${mkSlot('cena','🌙','Cena')}</div>
+    </div>`;
+  }
+  renderHistory();
+}
+
+function renderHistory() {
+  const container=document.getElementById('cal-history');
+  const curMon=getMonday(new Date());
+  const pastWeeks=new Map();
+  Object.keys(plan).sort().reverse().forEach(key=>{
+    const d=new Date(key+'T00:00:00'); const mon=getMonday(d); const mk=dk(mon);
+    if(mon<curMon && !pastWeeks.has(mk)) pastWeeks.set(mk,mon);
+  });
+  if(!pastWeeks.size){container.innerHTML=`<div class="cal-empty">Las semanas planificadas aparecerán aquí una vez pasen.</div>`;return;}
+  let html='';
+  pastWeeks.forEach((mon)=>{
+    let rows='',any=false;
+    for(let i=0;i<7;i++){
+      const d=addD(mon,i); const k=dk(d); const dd=plan[k]||{};
+      const meals=[];
+      if(dd.comida) meals.push(`<div class="history-meal"><span class="history-meal-type">Comida</span><span class="history-meal-name">${dd.comida}</span></div>`);
+      if(dd.cena)   meals.push(`<div class="history-meal"><span class="history-meal-type">Cena</span><span class="history-meal-name">${dd.cena}</span></div>`);
+      if(meals.length){any=true;rows+=`<div class="history-row"><div class="history-day-label">${DAYS[i]}</div><div class="history-meals">${meals.join('')}</div></div>`;}
+    }
+    if(any) html+=`<div class="history-week"><div class="history-week-head" onclick="this.parentElement.classList.toggle('open')"><span class="history-week-label">${fmtW(mon)}</span><span class="history-week-chev">▾</span></div><div class="history-week-body">${rows}</div></div>`;
+  });
+  container.innerHTML=html||`<div class="cal-empty">Sin historial aún.</div>`;
+}
+
+function moveWeek(dir){weekStart=addD(weekStart,dir*7);renderCalendar();}
+function goToToday(){weekStart=getMonday(new Date());renderCalendar();}
+
+function openModal(key,meal) {
+  modalCtx={key,meal};
+  const d=new Date(key+'T00:00:00');
+  const label=meal==='comida'?'Comida':'Cena';
+  const emoji=meal==='comida'?'🍽️':'🌙';
+  document.getElementById('modal-title').textContent=`${emoji} ${label} · ${DAYS[(d.getDay()+6)%7]} ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+  document.getElementById('modal-sub').textContent='Elige una receta del plan';
+  const recipes=data[meal].map(r=>r.name);
+  const current=(plan[key]||{})[meal]||'';
+  document.getElementById('modal-select').innerHTML=`<option value="">— Sin asignar —</option>`+recipes.map(r=>`<option value="${r}"${r===current?' selected':''}>${r}</option>`).join('');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');modalCtx=null;}
+function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
+async function saveSlot(){
+  if(!modalCtx)return;
+  const{key,meal}=modalCtx; const val=document.getElementById('modal-select').value;
+  if(!plan[key])plan[key]={};
+  if(val)plan[key][meal]=val; else delete plan[key][meal];
+  if(!plan[key].comida&&!plan[key].cena)delete plan[key];
+  await savePlan(); closeModal(); renderCalendar();
+}
+async function clearSlot(){
+  if(!modalCtx)return;
+  const{key,meal}=modalCtx;
+  if(plan[key]){delete plan[key][meal];if(!plan[key].comida&&!plan[key].cena)delete plan[key];}
+  await savePlan(); closeModal(); renderCalendar();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  render('list-desayuno', data.desayuno);
+  render('list-comida',   data.comida);
+  render('list-snack',    data.snack);
+  render('list-cena',     data.cena);
+  await loadPlan();
+});
+</script>
+</body>
+</html>
