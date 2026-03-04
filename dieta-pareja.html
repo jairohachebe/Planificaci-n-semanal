@@ -56,6 +56,7 @@ main { max-width:720px; margin:0 auto; padding:28px 20px 80px; }
 .kchip { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11.5px; font-weight:500; border:1px solid; }
 .kchip-l { background:var(--gray-100); color:var(--gray-600); border-color:var(--gray-200); }
 .kchip-y { background:var(--accent-pale); color:var(--accent); border-color:var(--accent-mid); }
+.kchip-t { background:var(--blue-pale); color:var(--blue); border-color:var(--blue-mid); }
 .recipe-list { display:flex; flex-direction:column; }
 .rrow { background:var(--white); border:1px solid var(--gray-200); border-radius:12px; overflow:hidden; margin-bottom:7px; transition:box-shadow .15s,border-color .15s; animation:fadeUp .2s ease both; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
@@ -71,6 +72,8 @@ main { max-width:720px; margin:0 auto; padding:28px 20px 80px; }
 .mtag { font-size:10.5px; font-weight:500; padding:2px 7px; border-radius:4px; white-space:nowrap; }
 .mtag-l { background:var(--gray-100); color:var(--gray-600); }
 .mtag-y { background:var(--accent-pale); color:var(--accent); font-weight:600; }
+.mtag-t { background:var(--blue-pale); color:var(--blue); font-weight:600; }
+.iqt { text-align:right; color:var(--blue); font-weight:600; font-variant-numeric:tabular-nums; padding-left:8px; white-space:nowrap; }
 .chev { color:var(--gray-400); transition:transform .2s,color .15s; flex-shrink:0; font-size:11px; }
 .rrow.open .chev { transform:rotate(180deg); color:var(--gray-700); }
 .rbody { display:none; border-top:1px solid var(--gray-100); }
@@ -92,8 +95,9 @@ main { max-width:720px; margin:0 auto; padding:28px 20px 80px; }
 .steps { display:flex; flex-direction:column; gap:8px; }
 .step { display:flex; gap:9px; font-size:12.5px; color:var(--gray-700); line-height:1.55; }
 .stepn { width:19px; height:19px; border-radius:50%; background:var(--gray-100); color:var(--gray-500); font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
-.show-lucia .mtag-y,.show-lucia .col-y,.show-lucia .iqy,.show-lucia .kchip-y { display:none!important; }
-.show-you .mtag-l,.show-you .col-l,.show-you .iql,.show-you .kchip-l { display:none!important; }
+.show-lucia .mtag-y,.show-lucia .col-y,.show-lucia .iqy,.show-lucia .kchip-y,.show-lucia .col-t,.show-lucia .iqt,.show-lucia .kchip-t,.show-lucia .mtag-t { display:none!important; }
+.show-you .mtag-l,.show-you .col-l,.show-you .iql,.show-you .kchip-l,.show-you .col-t,.show-you .iqt,.show-you .kchip-t,.show-you .mtag-t { display:none!important; }
+.show-total .mtag-l,.show-total .col-l,.show-total .iql,.show-total .kchip-l,.show-total .mtag-y,.show-total .col-y,.show-total .iqy,.show-total .kchip-y { display:none!important; }
 .cal-page { max-width:900px; margin:0 auto; padding:28px 20px 80px; }
 .cal-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
 .cal-nav { display:flex; align-items:center; gap:12px; }
@@ -176,12 +180,13 @@ main { max-width:720px; margin:0 auto; padding:28px 20px 80px; }
       <div class="topbar-icon">🥗</div>
       <div>
         <div class="topbar-title">Plan Nutricional</div>
-        <div class="topbar-sub">Lucía · 1550 kcal &nbsp;·&nbsp; Tú · 2000 kcal</div>
+        <div class="topbar-sub">Lucía · 1550 kcal &nbsp;·&nbsp; Jairo · 1750 kcal</div>
       </div>
     </div>
     <div class="ptoggle" id="ptoggle-wrap">
       <button class="pbtn" id="btn-lucia" onclick="setMode('lucia')">Lucía</button>
-      <button class="pbtn active" id="btn-you" onclick="setMode('you')">Tú</button>
+      <button class="pbtn active" id="btn-you" onclick="setMode('you')">Jairo</button>
+      <button class="pbtn" id="btn-total" onclick="setMode('total')">Total</button>
     </div>
   </div>
 </div>
@@ -207,7 +212,7 @@ main { max-width:720px; margin:0 auto; padding:28px 20px 80px; }
       <div class="sec-intro">
         <div class="sec-heading">Desayuno</div>
         <div class="sec-desc">Elige una receta cada día.</div>
-        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~350 kcal</span><span class="kchip kchip-y">Tú · ~452 kcal</span></div>
+        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~350 kcal</span><span class="kchip kchip-y">Jairo · ~395 kcal</span><span class="kchip kchip-t">Total · ~745 kcal</span></div>
       </div>
       <div class="recipe-list" id="list-desayuno"></div>
     </div>
@@ -215,7 +220,7 @@ main { max-width:720px; margin:0 auto; padding:28px 20px 80px; }
       <div class="sec-intro">
         <div class="sec-heading">Comida</div>
         <div class="sec-desc">Plato principal del día.</div>
-        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~625 kcal</span><span class="kchip kchip-y">Tú · ~806 kcal</span></div>
+        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~625 kcal</span><span class="kchip kchip-y">Jairo · ~706 kcal</span><span class="kchip kchip-t">Total · ~1331 kcal</span></div>
       </div>
       <div class="recipe-list" id="list-comida"></div>
     </div>
@@ -223,7 +228,7 @@ main { max-width:720px; margin:0 auto; padding:28px 20px 80px; }
       <div class="sec-intro">
         <div class="sec-heading">Snack</div>
         <div class="sec-desc">Un picoteo sencillo entre horas.</div>
-        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~105 kcal</span><span class="kchip kchip-y">Tú · ~135 kcal</span></div>
+        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~105 kcal</span><span class="kchip kchip-y">Jairo · ~119 kcal</span><span class="kchip kchip-t">Total · ~224 kcal</span></div>
       </div>
       <div class="recipe-list" id="list-snack"></div>
     </div>
@@ -231,7 +236,7 @@ main { max-width:720px; margin:0 auto; padding:28px 20px 80px; }
       <div class="sec-intro">
         <div class="sec-heading">Cena</div>
         <div class="sec-desc">Cena ligera y equilibrada.</div>
-        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~472 kcal</span><span class="kchip kchip-y">Tú · ~608 kcal</span></div>
+        <div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~472 kcal</span><span class="kchip kchip-y">Jairo · ~533 kcal</span><span class="kchip kchip-t">Total · ~1005 kcal</span></div>
       </div>
       <div class="recipe-list" id="list-cena"></div>
     </div>
@@ -270,7 +275,7 @@ main { max-width:720px; margin:0 auto; padding:28px 20px 80px; }
 <div class="sync-badge" id="sync-status"></div>
 
 <script>
-const SCALE = 2000 / 1550;
+const SCALE = 1750 / 1550;
 
 const data = {
 desayuno: [
@@ -380,10 +385,20 @@ function scaleQty(q) {
   return `${Math.round(parseFloat(m[1].replace(',','.')) * SCALE)} ${m[2]}`.trim();
 }
 
+function totalQty(q) {
+  if (!q) return q;
+  const lo = q.toLowerCase();
+  if (lo === 'al gusto' || lo.includes('pizca') || lo === '1 cdta.' || lo === '1 dado') return q;
+  const m = q.match(/^(\d+(?:[.,]\d+)?)\s*(.*)/);
+  if (!m) return q;
+  return `${Math.round(parseFloat(m[1].replace(',','.')) * (1 + SCALE))} ${m[2]}`.trim();
+}
+
 function render(listId, recipes) {
   document.getElementById(listId).innerHTML = recipes.map((r,i) => {
     const ky=Math.round(r.kcalL*SCALE), py=Math.round(r.protL*SCALE), cy=Math.round(r.carbL*SCALE), fy=Math.round(r.fatL*SCALE);
-    const ings = r.ingredients.map(ing => `<tr><td class="iname">${ing.n}</td><td class="iql">${ing.q}</td><td class="iqy">${scaleQty(ing.q)}</td></tr>`).join('');
+    const kt=r.kcalL+ky, pt=r.protL+py, ct=r.carbL+cy, ft=r.fatL+fy;
+    const ings = r.ingredients.map(ing => `<tr><td class="iname">${ing.n}</td><td class="iql">${ing.q}</td><td class="iqy">${scaleQty(ing.q)}</td><td class="iqt">${totalQty(ing.q)}</td></tr>`).join('');
     const steps = r.steps.map((s,j) => `<div class="step"><span class="stepn">${j+1}</span><span>${s}</span></div>`).join('');
     return `<div class="rrow" style="animation-delay:${i*.04}s" onclick="toggleRow(this)">
       <div class="rhead">
@@ -395,6 +410,7 @@ function render(listId, recipes) {
             <div class="mtags">
               <span class="mtag mtag-l">${r.kcalL} kcal · ${r.protL}p · ${r.carbL}c · ${r.fatL}g</span>
               <span class="mtag mtag-y">${ky} kcal · ${py}p · ${cy}c · ${fy}g</span>
+              <span class="mtag mtag-t">${kt} kcal · ${pt}p · ${ct}c · ${ft}g</span>
             </div>
           </div>
         </div>
@@ -403,7 +419,7 @@ function render(listId, recipes) {
       <div class="rbody"><div class="rbody-inner">
         <div>
           <div class="bsec-title">Ingredientes</div>
-          <table class="itbl"><thead><tr><th></th><th class="col-l">Lucía</th><th class="col-y">Tú</th></tr></thead><tbody>${ings}</tbody></table>
+          <table class="itbl"><thead><tr><th></th><th class="col-l">Lucía</th><th class="col-y">Jairo</th><th class="col-t">Total</th></tr></thead><tbody>${ings}</tbody></table>
         </div>
         <div>
           <div class="bsec-title">Preparación</div>
@@ -419,6 +435,7 @@ function setMode(m) {
   document.body.className = 'show-' + m;
   document.getElementById('btn-lucia').classList.toggle('active', m==='lucia');
   document.getElementById('btn-you').classList.toggle('active', m==='you');
+  document.getElementById('btn-total').classList.toggle('active', m==='total');
 }
 function showTab(id, btn) {
   document.querySelectorAll('.rsection').forEach(s=>s.classList.remove('active'));
