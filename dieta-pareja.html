@@ -36,11 +36,12 @@ body { font-family:var(--font); background:var(--gray-50); color:var(--gray-900)
 .ptoggle { display:flex; background:var(--gray-100); border-radius:8px; padding:3px; gap:2px; border:1px solid var(--gray-200); flex-shrink:0; }
 .pbtn { padding:5px 13px; border-radius:6px; border:none; background:transparent; font-family:var(--font); font-size:12px; font-weight:500; color:var(--gray-500); cursor:pointer; transition:all .15s; white-space:nowrap; }
 .pbtn.active { background:var(--white); color:var(--gray-900); box-shadow:var(--shadow-sm); font-weight:600; }
-.mainnav { background:rgba(255,255,255,.96); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid var(--gray-200); position:sticky; top:57px; z-index:195; }
+.subnav-wrap { position:sticky; top:57px; z-index:195; background:rgba(255,255,255,.96); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+.mainnav { border-bottom:1px solid var(--gray-200); }
 .mainnav-inner { max-width:720px; margin:0 auto; display:flex; padding:0 16px; }
 .mnbtn { flex-shrink:0; padding:11px 18px 9px; border:none; background:transparent; font-family:var(--font); font-size:13px; font-weight:500; color:var(--gray-500); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; display:flex; align-items:center; gap:6px; }
 .mnbtn.active { color:var(--gray-900); border-bottom-color:var(--gray-900); font-weight:600; }
-.tabnav { background:rgba(255,255,255,.96); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid var(--gray-200); position:sticky; top:105px; z-index:190; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.tabnav { border-bottom:1px solid var(--gray-200); overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
 .tabnav::-webkit-scrollbar { display:none; }
 .tabnav-inner { display:flex; max-width:720px; margin:0 auto; padding:0 16px; }
 .tbtn { flex-shrink:0; padding:11px 14px 9px; border:none; background:transparent; font-family:var(--font); font-size:13px; font-weight:500; color:var(--gray-500); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; display:flex; align-items:center; gap:5px; white-space:nowrap; }
@@ -196,17 +197,19 @@ main { max-width:720px; margin:0 auto; padding:28px 20px 80px; }
     <button class="pbtn" id="btn-total" onclick="setMode('total')">Total</button>
   </div>
 </div></div>
-<div class="mainnav"><div class="mainnav-inner">
-  <button class="mnbtn active" id="mn-recetas" onclick="showPage('recetas',this)">🍽️ Recetas</button>
-  <button class="mnbtn" id="mn-semana" onclick="showPage('semana',this)">📅 Planificación semanal</button>
-</div></div>
-<div class="page active" id="page-recetas">
-  <div class="tabnav"><div class="tabnav-inner">
+<div class="subnav-wrap">
+  <div class="mainnav"><div class="mainnav-inner">
+    <button class="mnbtn active" id="mn-recetas" onclick="showPage('recetas',this)">🍽️ Recetas</button>
+    <button class="mnbtn" id="mn-semana" onclick="showPage('semana',this)">📅 Planificación semanal</button>
+  </div></div>
+  <div class="tabnav" id="tabnav-recetas"><div class="tabnav-inner">
     <button class="tbtn active" onclick="showTab('desayuno',this)"><span class="te">☀️</span>Desayuno</button>
     <button class="tbtn" onclick="showTab('comida',this)"><span class="te">🍽️</span>Comida</button>
     <button class="tbtn" onclick="showTab('snack',this)"><span class="te">🍫</span>Snack</button>
     <button class="tbtn" onclick="showTab('cena',this)"><span class="te">🌙</span>Cena</button>
   </div></div>
+</div>
+<div class="page active" id="page-recetas">
   <main>
     <div class="rsection active" id="tab-desayuno"><div class="sec-intro"><div class="sec-heading">Desayuno</div><div class="sec-desc">Elige una receta cada día.</div><div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~350 kcal</span><span class="kchip kchip-y">Jairo · ~395 kcal</span><span class="kchip kchip-t">Total · ~745 kcal</span></div></div><div class="recipe-list" id="list-desayuno"></div></div>
     <div class="rsection" id="tab-comida"><div class="sec-intro"><div class="sec-heading">Comida</div><div class="sec-desc">Plato principal del día.</div><div class="kcal-chips"><span class="kchip kchip-l">Lucía · ~625 kcal</span><span class="kchip kchip-y">Jairo · ~706 kcal</span><span class="kchip kchip-t">Total · ~1331 kcal</span></div></div><div class="recipe-list" id="list-comida"></div></div>
@@ -456,6 +459,7 @@ document.querySelectorAll('.mnbtn').forEach(b=>b.classList.remove('active'));
 document.getElementById('page-'+id).classList.add('active');
 btn.classList.add('active');
 document.getElementById('ptoggle-wrap').style.display = (id==='semana') ? 'none' : '';
+document.getElementById('tabnav-recetas').style.display = (id==='semana') ? 'none' : '';
 if (id==='semana') renderCalendar();
 }
 
@@ -541,8 +545,8 @@ document.getElementById('modal-overlay').classList.add('open');
 }
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open');modalCtx=null;}
 function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
-async function saveSlot(){ if(!modalCtx)return; const{key,meal}=modalCtx; const val=document.getElementById('modal-select').value; if(!plan[key])plan[key]={}; if(val)plan[key][meal]=val; else delete plan[key][meal]; if(!plan[key].comida&&!plan[key].cena)delete plan[key]; await savePlan(); closeModal(); renderCalendar(); }
-async function clearSlot(){ if(!modalCtx)return; const{key,meal}=modalCtx; if(plan[key]){delete plan[key][meal];if(!plan[key].comida&&!plan[key].cena)delete plan[key];} await savePlan(); closeModal(); renderCalendar(); }
+function saveSlot(){ if(!modalCtx)return; const{key,meal}=modalCtx; const val=document.getElementById('modal-select').value; if(!plan[key])plan[key]={}; if(val)plan[key][meal]=val; else delete plan[key][meal]; if(!plan[key].comida&&!plan[key].cena)delete plan[key]; closeModal(); renderCalendar(); savePlan(); }
+function clearSlot(){ if(!modalCtx)return; const{key,meal}=modalCtx; if(plan[key]){delete plan[key][meal];if(!plan[key].comida&&!plan[key].cena)delete plan[key];} closeModal(); renderCalendar(); savePlan(); }
 
 document.addEventListener('DOMContentLoaded', async () => {
   renderAll();
